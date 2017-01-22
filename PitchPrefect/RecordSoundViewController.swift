@@ -19,20 +19,29 @@ class RecordSoundViewController: UIViewController, AVAudioRecorderDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        stopButton.isEnabled = false;
+        stopButton.isEnabled = false
+        recordingButton.imageView?.contentMode = .scaleAspectFit
+        stopButton.imageView?.contentMode = .scaleAspectFit
         // Do any additional setup after loading the view, typically from a nib.
+    }
+    
+    func updateUI() {
+        stopButton.isEnabled = !stopButton.isEnabled
+        recordingButton.isEnabled = !recordingButton.isEnabled
+        if !stopButton.isEnabled {
+            recordingLabel.text = "Tap to Record"
+        } else {
+            recordingLabel.text = "Recording in progress"
+        }
     }
 
     @IBAction func recordAudio(_ sender: Any) {
-        recordingLabel.text = "Recording in progress"
-        stopButton.isEnabled = true
-        recordingButton.isEnabled = false
+        updateUI()
         
         let dirPath = NSSearchPathForDirectoriesInDomains(.documentDirectory,.userDomainMask, true)[0] as String
         let recordingName = "recordedVoice.wav"
         let pathArray = [dirPath, recordingName]
         let filePath = URL(string: pathArray.joined(separator: "/"))
-        print(filePath)
         
         let session = AVAudioSession.sharedInstance()
         try! session.setCategory(AVAudioSessionCategoryPlayAndRecord, with:AVAudioSessionCategoryOptions.defaultToSpeaker)
@@ -46,9 +55,7 @@ class RecordSoundViewController: UIViewController, AVAudioRecorderDelegate {
     
 
     @IBAction func stopRecording(_ sender: Any) {
-        recordingButton.isEnabled = true
-        stopButton.isEnabled = false
-        recordingLabel.text = "Tap to Record"
+        updateUI()
         audioRecorder.stop()
         let audioSession = AVAudioSession.sharedInstance()
         try! audioSession.setActive(false)
@@ -56,7 +63,7 @@ class RecordSoundViewController: UIViewController, AVAudioRecorderDelegate {
     
     func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
         if flag {
-            self.performSegue(withIdentifier: "stopRecording", sender: audioRecorder.url)
+            performSegue(withIdentifier: "stopRecording", sender: audioRecorder.url)
         } else {
             print("fail")
         }
